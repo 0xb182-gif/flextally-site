@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="FlexTally — a simple time tracker for work hours and flex balance.">
+  <title>FlexTally</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #faf8f4;
+      --fg: #1a1a18;
+      --muted: #6b6b65;
+      --hairline: #e4e1d9;
+      --accent: #c9532a;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f0f0e;
+        --fg: #e8e6e0;
+        --muted: #8a8a82;
+        --hairline: #25241f;
+        --accent: #e2734a;
+      }
+    }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI Variable", "Segoe UI", sans-serif;
+      font-size: 17px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+    .wrap {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 56px 24px 80px;
+    }
+    .eyebrow {
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 0 0 24px;
+    }
+    .eyebrow .dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      margin-right: 8px;
+      vertical-align: 2px;
+    }
+    h1 {
+      font-family: ui-serif, Georgia, "Iowan Old Style", "Apple Garamond", "Times New Roman", serif;
+      font-weight: 400;
+      font-size: clamp(36px, 6vw, 52px);
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin: 0 0 32px;
+    }
+    h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+    p { margin: 0 0 20px; }
+    .lede {
+      font-size: 19px;
+      color: var(--muted);
+      margin-bottom: 40px;
+      max-width: 32em;
+    }
+    .features {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 48px;
+      border-top: 1px solid var(--hairline);
+    }
+    .features li {
+      padding: 18px 0;
+      border-bottom: 1px solid var(--hairline);
+      display: flex;
+      gap: 16px;
+      align-items: baseline;
+    }
+    .features .num {
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 12px;
+      color: var(--muted);
+      min-width: 28px;
+      letter-spacing: 0.05em;
+    }
+    .signature {
+      font-family: ui-serif, Georgia, serif;
+      font-style: italic;
+      color: var(--muted);
+      margin-top: 48px;
+      font-size: 16px;
+    }
+    nav {
+      margin-top: 56px;
+      padding-top: 28px;
+      border-top: 1px solid var(--hairline);
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      display: flex;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+    nav a {
+      color: var(--fg);
+      text-decoration: none;
+      border-bottom: 1px solid var(--hairline);
+      padding-bottom: 2px;
+      transition: border-color 0.15s ease;
+    }
+    nav a:hover { border-bottom-color: var(--accent); }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <p class="eyebrow"><span class="dot"></span>FlexTally — iOS</p>
+
+    <h1>Track hours.<br>Own your <em>flex.</em></h1>
+
+    <p class="lede">FlexTally is the simplest way to track your work hours and stay on top of your flex balance. No subscription, no account, no nonsense.</p>
+
+    <ul class="features">
+      <li><span class="num">01</span><span>Log start and end times each day with a smooth scroll picker — no typing, no fiddling.</span></li>
+      <li><span class="num">02</span><span>Add breaks and tag days as WFH, Sick, Public Holiday, Flex Day, or Annual Leave.</span></li>
+      <li><span class="num">03</span><span>See exactly where your flex balance stands across the week or fortnight.</span></li>
+      <li><span class="num">04</span><span>Everything stays on your device. No cloud, no analytics, no tracking.</span></li>
+    </ul>
+
+    <p class="signature">A small app for people who like their hours to add up.</p>
+
+    <nav>
+      <a href="./privacy.html">Privacy</a>
+      <a href="./support.html">Support</a>
+    </nav>
+  </main>
+</body>
+</html>
