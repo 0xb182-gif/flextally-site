@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TimeTracker — Log your hours. Keep your flex. Keep your data.</title>
+<meta name="description" content="A private, offline iOS app to track your work hours, breaks, flex-time and leave. No sign-up. No subscription. No ads.">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #08090b;
+    --bg-2: #0c1416;
+    --card: rgba(255,255,255,0.04);
+    --border: rgba(255,255,255,0.10);
+    --border-soft: rgba(255,255,255,0.06);
+    --text: #ffffff;
+    --muted: #b8bcc2;
+    --dim: #8a8e95;
+    --accent: oklch(0.78 0.13 185);
+    --accent-strong: oklch(0.62 0.16 185);
+    --positive: oklch(0.72 0.16 145);
+  }
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, system-ui, 'SF Pro Display', 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    scroll-behavior: smooth;
+  }
+  body {
+    background:
+      radial-gradient(circle at 78% 8%, oklch(0.45 0.14 185 / 0.35) 0%, transparent 45%),
+      radial-gradient(circle at 12% 30%, oklch(0.40 0.13 200 / 0.30) 0%, transparent 40%),
+      linear-gradient(180deg, #0c1416 0%, #0a0b0d 50%, #0e1418 100%);
+    min-height: 100vh;
+  }
+  a { color: inherit; text-decoration: none; }
+  img { display: block; max-width: 100%; }
+
+  /* === Layout === */
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 32px; }
+  section { padding: 96px 0; position: relative; }
+  @media (max-width: 768px) { section { padding: 64px 0; } .wrap { padding: 0 20px; } }
+
+  /* === Nav === */
+  nav {
+    position: sticky; top: 0; z-index: 50;
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    background: rgba(8,9,11,0.65);
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .nav-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 0;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 12px;
+    font-weight: 700; font-size: 18px;
+    letter-spacing: -0.3px;
+  }
+  .brand img { width: 36px; height: 36px; border-radius: 9px; }
+  .brand .accent { color: var(--accent); }
+  .nav-links {
+    display: flex; align-items: center; gap: 28px;
+  }
+  .nav-links a {
+    font-size: 15px; color: var(--muted); font-weight: 500;
+    transition: color .15s;
+  }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta {
+    background: var(--accent-strong); color: #fff;
+    padding: 10px 18px; border-radius: 100px;
+    font-size: 14px; font-weight: 600;
+  }
+  @media (max-width: 640px) {
+    .nav-links a:not(.nav-cta) { display: none; }
+  }
+
+  /* === Hero === */
+  .hero { padding-top: 80px; padding-bottom: 32px; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    padding: 8px 16px; border-radius: 100px;
+    font-size: 12px; font-weight: 700;
+    letter-spacing: 0.6px; text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 24px;
+  }
+  .badge .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--positive);
+    box-shadow: 0 0 14px var(--positive);
+  }
+  .hero h1 {
+    font-size: clamp(48px, 8vw, 96px);
+    font-weight: 800; line-height: 0.95;
+    letter-spacing: -0.04em;
+    margin-bottom: 24px;
+    text-wrap: balance;
+  }
+  .hero h1 .accent { color: var(--accent); }
+  .hero p.lede {
+    font-size: clamp(18px, 2vw, 24px);
+    color: var(--muted); font-weight: 400;
+    line-height: 1.45;
+    max-width: 640px;
+    margin-bottom: 36px;
+    letter-spacing: -0.01em;
+  }
+  .hero-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px; align-items: center;
+  }
+  @media (max-width: 900px) {
+    .hero-row { grid-template-columns: 1fr; gap: 40px; text-align: center; }
+    .hero-row .hero-text { display: flex; flex-direction: column; align-items: center; }
+  }
+  .cta-row { display: flex; gap: 14px; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 14px 24px; border-radius: 14px;
+    font-size: 16px; font-weight: 600;
+    letter-spacing: -0.01em;
+    transition: transform .15s, box-shadow .15s;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn.primary {
+    background: var(--accent-strong); color: #fff;
+    box-shadow: 0 8px 32px oklch(0.62 0.16 185 / 0.4);
+  }
+  .btn.ghost {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .pill-list { display: flex; gap: 16px 22px; flex-wrap: wrap; margin-top: 24px; color: var(--dim); font-size: 14px; }
+  .pill-list span { display: inline-flex; align-items: center; gap: 6px; }
+  .pill-list svg { flex-shrink: 0; color: var(--accent); }
+
+  /* phone illustration */
+  .hero-phone {
+    position: relative;
+    aspect-ratio: 9/19.5;
+    max-width: 360px; margin: 0 auto;
+    background: linear-gradient(160deg, #2a2a2e, #16161a);
+    border-radius: 56px; padding: 10px;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.10);
+  }
+  .hero-phone-screen {
+    width: 100%; height: 100%;
+    background: #000; border-radius: 46px;
+    overflow: hidden; position: relative;
+  }
+  .hero-phone-screen img {
+    width: 100%; height: 100%; object-fit: cover;
+  }
+
+  /* === Pros strip === */
+  .pros {
+    border-top: 1px solid var(--border-soft);
+    border-bottom: 1px solid var(--border-soft);
+    background: rgba(255,255,255,0.015);
+  }
+  .pros-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+  }
+  @media (max-width: 900px) { .pros-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 480px) { .pros-grid { grid-template-columns: 1fr; } }
+  .pro {
+    display: flex; align-items: center; gap: 14px;
+    padding: 18px 20px;
+    background: var(--card);
+    border: 1px solid var(--border-soft);
+    border-radius: 16px;
+  }
+  .pro .tick {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--accent-strong);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .pro span { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+
+  /* === Feature blocks === */
+  .feature-block {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 64px; align-items: center;
+  }
+  .feature-block.reverse { direction: rtl; }
+  .feature-block.reverse > * { direction: ltr; }
+  @media (max-width: 900px) {
+    .feature-block, .feature-block.reverse { grid-template-columns: 1fr; gap: 40px; direction: ltr; }
+  }
+  .feature-text h2 {
+    font-size: clamp(34px, 5vw, 56px);
+    font-weight: 800; line-height: 1.0;
+    letter-spacing: -0.03em;
+    margin-bottom: 20px;
+    text-wrap: balance;
+  }
+  .feature-text h2 .accent { color: var(--accent); }
+  .feature-text .eyebrow {
+    display: inline-block;
+    font-size: 12px; font-weight: 700;
+    letter-spacing: 0.8px; text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+  .feature-text p {
+    font-size: 18px; color: var(--muted);
+    line-height: 1.55;
+    max-width: 480px;
+    margin-bottom: 24px;
+  }
+  .feature-text ul {
+    list-style: none; display: flex; flex-direction: column; gap: 10px;
+  }
+  .feature-text ul li {
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 16px; color: var(--text);
+    letter-spacing: -0.01em;
+  }
+  .feature-text ul li svg { color: var(--accent); flex-shrink: 0; margin-top: 4px; }
+
+  .feature-phone {
+    aspect-ratio: 9/19.5;
+    max-width: 340px; margin: 0 auto;
+    background: linear-gradient(160deg, #2a2a2e, #16161a);
+    border-radius: 52px; padding: 9px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08);
+  }
+  .feature-phone-screen {
+    width: 100%; height: 100%;
+    background: #000; border-radius: 44px;
+    overflow: hidden;
+  }
+  .feature-phone img { width: 100%; height: 100%; object-fit: cover; }
+
+  /* === Privacy callout === */
+  .callout {
+    background:
+      radial-gradient(circle at 30% 0%, oklch(0.45 0.14 185 / 0.25) 0%, transparent 60%),
+      rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 28px;
+    padding: 56px 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .callout h2 {
+    font-size: clamp(32px, 5vw, 48px);
+    font-weight: 800; letter-spacing: -0.03em;
+    line-height: 1.05; margin-bottom: 18px;
+  }
+  .callout h2 .accent { color: var(--accent); }
+  .callout p {
+    font-size: 18px; color: var(--muted);
+    max-width: 600px; margin: 0 auto;
+    line-height: 1.55;
+  }
+  .callout-icons {
+    display: flex; gap: 32px; justify-content: center; flex-wrap: wrap;
+    margin-top: 32px;
+  }
+  .callout-icon {
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    color: var(--dim); font-size: 13px; font-weight: 600;
+  }
+  .callout-icon-circle {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent);
+  }
+
+  /* === FAQ === */
+  .faq h2 {
+    font-size: clamp(32px, 5vw, 48px);
+    font-weight: 800; letter-spacing: -0.03em;
+    margin-bottom: 8px; text-align: center;
+  }
+  .faq .lede {
+    text-align: center; color: var(--muted);
+    font-size: 17px; margin-bottom: 40px;
+  }
+  .faq-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;
+    max-width: 960px; margin: 0 auto;
+  }
+  @media (max-width: 760px) { .faq-grid { grid-template-columns: 1fr; } }
+  details.faq-item {
+    background: var(--card);
+    border: 1px solid var(--border-soft);
+    border-radius: 16px;
+    padding: 20px 24px;
+    transition: border-color .15s;
+  }
+  details.faq-item[open] { border-color: var(--border); }
+  details.faq-item summary {
+    cursor: pointer; list-style: none;
+    font-weight: 600; font-size: 16px;
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 12px;
+  }
+  details.faq-item summary::-webkit-details-marker { display: none; }
+  details.faq-item summary::after {
+    content: '+'; color: var(--accent);
+    font-size: 22px; font-weight: 400;
+    transition: transform .2s;
+  }
+  details.faq-item[open] summary::after { content: '−'; }
+  details.faq-item p {
+    margin-top: 12px; color: var(--muted);
+    font-size: 15px; line-height: 1.55;
+  }
+
+  /* === Final CTA === */
+  .final-cta {
+    text-align: center; padding: 96px 0;
+  }
+  .final-cta h2 {
+    font-size: clamp(40px, 7vw, 72px);
+    font-weight: 800; letter-spacing: -0.03em;
+    line-height: 1.0; margin-bottom: 20px;
+    text-wrap: balance;
+  }
+  .final-cta h2 .accent { color: var(--accent); }
+  .final-cta p {
+    font-size: 18px; color: var(--muted);
+    margin-bottom: 32px;
+  }
+  .final-cta .cta-row { justify-content: center; }
+
+  /* === Footer === */
+  footer {
+    border-top: 1px solid var(--border-soft);
+    padding: 32px 0 48px;
+    text-align: center;
+    color: var(--dim);
+    font-size: 14px;
+  }
+  footer .foot-row {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 24px; flex-wrap: wrap;
+  }
+  footer .foot-row a { color: var(--dim); }
+  footer .foot-row a:hover { color: var(--text); }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap nav-row">
+    <a class="brand" href="#top">
+      <img src="TimeTracker Icon 1024.png" alt="">
+      <span>Time<span class="accent">Tracker</span></span>
+    </a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#privacy">Privacy</a>
+      <a href="#faq">FAQ</a>
+      <a class="nav-cta" href="#download">Get the app</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero" id="top">
+  <div class="wrap hero-row">
+    <div class="hero-text">
+      <div class="badge"><span class="dot"></span>Available on the App Store</div>
+      <h1>Log your hours.<br/>Keep your <span class="accent">flex</span>.<br/>Keep your data.</h1>
+      <p class="lede">A private, offline iOS app for tracking work hours, breaks, flex-time and leave — without the sign-ups, subscriptions or surprises.</p>
+      <div class="cta-row">
+        <a href="#download" class="btn primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 12.04c-.03-3.16 2.58-4.68 2.7-4.75-1.47-2.15-3.76-2.44-4.57-2.48-1.94-.2-3.79 1.14-4.78 1.14-.99 0-2.52-1.11-4.14-1.08-2.13.03-4.09 1.24-5.19 3.14-2.21 3.83-.56 9.5 1.59 12.61 1.05 1.52 2.3 3.23 3.93 3.17 1.59-.07 2.18-1.02 4.1-1.02 1.92 0 2.45 1.02 4.13.99 1.71-.03 2.79-1.55 3.83-3.08 1.21-1.77 1.7-3.49 1.73-3.58-.04-.02-3.32-1.27-3.34-5.06zM14.13 4.01c.87-1.06 1.46-2.54 1.3-4.01-1.26.05-2.78.84-3.68 1.9-.81.93-1.51 2.43-1.32 3.87 1.4.11 2.84-.71 3.7-1.76z"/></svg>
+          Download on the App Store
+        </a>
+        <a href="#features" class="btn ghost">See features</a>
+      </div>
+      <div class="pill-list">
+        <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> One-off purchase</span>
+        <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> No account</span>
+        <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> 100% offline</span>
+        <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> No ads</span>
+      </div>
+    </div>
+    <div class="hero-phone">
+      <div class="hero-phone-screen">
+        <img src="screenshot-log.png" alt="TimeTracker log screen">
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pros" id="why">
+  <div class="wrap">
+    <div class="pros-grid">
+      <div class="pro"><div class="tick"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><span>No sign up</span></div>
+      <div class="pro"><div class="tick"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><span>No subscription</span></div>
+      <div class="pro"><div class="tick"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><span>No ads, ever</span></div>
+      <div class="pro"><div class="tick"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><span>100% offline</span></div>
+      <div class="pro"><div class="tick"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><span>Auto flex tally</span></div>
+      <div class="pro"><div class="tick"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><span>Multiple breaks</span></div>
+      <div class="pro"><div class="tick"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><span>Light &amp; dark mode</span></div>
+      <div class="pro"><div class="tick"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><span>CSV export</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="features">
+  <div class="wrap">
+    <div class="feature-block">
+      <div class="feature-text">
+        <span class="eyebrow">Track your hours</span>
+        <h2>Your <span class="accent">fortnight</span><br/>at a glance.</h2>
+        <p>Every day, every break, every minute — laid out clean and ready to log. Tap a time, scroll a wheel, done.</p>
+        <ul>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Week or fortnight pay cycle</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Start your week any day (yes, Thursday too)</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Add multiple breaks per day</li>
+        </ul>
+      </div>
+      <div class="feature-phone">
+        <div class="feature-phone-screen">
+          <img src="screenshot-log.png" alt="Log screen">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:0;">
+  <div class="wrap">
+    <div class="feature-block reverse">
+      <div class="feature-text">
+        <span class="eyebrow">Smart flex tracking</span>
+        <h2>Flex hours,<br/>done <span class="accent">right</span>.</h2>
+        <p>Set your required hours and TimeTracker keeps a live running balance — across every day, every period, every roll-over.</p>
+        <ul>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Automatic daily &amp; period totals</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Tag flex days — they deduct from your bank</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Sick / leave / public holidays don't penalise</li>
+        </ul>
+      </div>
+      <div class="feature-phone">
+        <div class="feature-phone-screen">
+          <img src="screenshot-log-light.png" alt="Flex tracking">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:0;">
+  <div class="wrap">
+    <div class="feature-block">
+      <div class="feature-text">
+        <span class="eyebrow">Built around you</span>
+        <h2>Your week,<br/><span class="accent">your way</span>.</h2>
+        <p>Six accent colours. Five app icons. Light, dark or auto. Customise everything until TimeTracker feels like yours.</p>
+        <ul>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Configurable required hours per day</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Show or hide weekends</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Add your own day tags</li>
+        </ul>
+      </div>
+      <div class="feature-phone">
+        <div class="feature-phone-screen">
+          <img src="screenshot-settings.png" alt="Settings">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="privacy">
+  <div class="wrap">
+    <div class="callout">
+      <h2>No cloud. No account.<br/><span class="accent">Just your data.</span></h2>
+      <p>Every hour stays on your device. No tracking, no servers, no analytics. You own it. You export it. You delete it.</p>
+      <div class="callout-icons">
+        <div class="callout-icon">
+          <div class="callout-icon-circle">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          On-device
+        </div>
+        <div class="callout-icon">
+          <div class="callout-icon-circle">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          Encrypted
+        </div>
+        <div class="callout-icon">
+          <div class="callout-icon-circle">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10A15 15 0 0 1 8 12a15 15 0 0 1 4-10z"/></svg>
+          </div>
+          No network
+        </div>
+        <div class="callout-icon">
+          <div class="callout-icon-circle">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </div>
+          Export as CSV
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="faq" id="faq">
+  <div class="wrap">
+    <h2>Common questions</h2>
+    <p class="lede">Quick answers to the things people usually ask.</p>
+    <div class="faq-grid">
+      <details class="faq-item">
+        <summary>How much does it cost?</summary>
+        <p>A$2.99 one-off purchase on the App Store. No subscription, no in-app purchases, no ads — pay once and it's yours.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Does it work without internet?</summary>
+        <p>Completely. TimeTracker never makes a network request. Everything lives on your phone.</p>
+      </details>
+      <details class="faq-item">
+        <summary>How does flex tracking work?</summary>
+        <p>You set your required hours per day. Any time you log over that adds to your flex balance; any time under it subtracts. Take a flex day and it deducts a full day from the bank.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Can my week start on Thursday?</summary>
+        <p>It can start any day you like. Same for fortnights — pick which week you're currently in.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Can I export my hours?</summary>
+        <p>Yes — share a CSV of any pay period straight to email, files, or anywhere else.</p>
+      </details>
+      <details class="faq-item">
+        <summary>What if I get a new phone?</summary>
+        <p>Restore from your iCloud device backup like any other iOS app and your data comes with you.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<section class="final-cta" id="download">
+  <div class="wrap">
+    <h2>Track your hours.<br/>Keep your <span class="accent">peace of mind</span>.</h2>
+    <p>A$2.99 one-off. iPhone &amp; Android.</p>
+    <div class="cta-row">
+      <a href="#" class="btn primary">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 12.04c-.03-3.16 2.58-4.68 2.7-4.75-1.47-2.15-3.76-2.44-4.57-2.48-1.94-.2-3.79 1.14-4.78 1.14-.99 0-2.52-1.11-4.14-1.08-2.13.03-4.09 1.24-5.19 3.14-2.21 3.83-.56 9.5 1.59 12.61 1.05 1.52 2.3 3.23 3.93 3.17 1.59-.07 2.18-1.02 4.1-1.02 1.92 0 2.45 1.02 4.13.99 1.71-.03 2.79-1.55 3.83-3.08 1.21-1.77 1.7-3.49 1.73-3.58-.04-.02-3.32-1.27-3.34-5.06zM14.13 4.01c.87-1.06 1.46-2.54 1.3-4.01-1.26.05-2.78.84-3.68 1.9-.81.93-1.51 2.43-1.32 3.87 1.4.11 2.84-.71 3.7-1.76z"/></svg>
+        App Store
+      </a>
+      <a href="#" class="btn ghost">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3.609 1.814 13.792 12 3.61 22.186a.996.996 0 0 1-.61-.92V2.734a1 1 0 0 1 .609-.92zm10.89 10.893 2.302 2.302-10.937 6.333 8.635-8.635zm3.199-3.198 2.807 1.626a1 1 0 0 1 0 1.73l-2.808 1.626L15.198 12l2.5-2.491zM5.864 2.658L16.802 8.99l-2.302 2.303-8.636-8.635z"/></svg>
+        Google Play
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-row">
+    <div>&copy; 2026 TimeTracker</div>
+    <div style="display:flex; gap:24px;">
+      <a href="#">Privacy</a>
+      <a href="#">Support</a>
+      <a href="mailto:hello@example.com">Contact</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
